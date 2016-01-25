@@ -5,9 +5,9 @@
 from setuptools import setup
 
 setup(name="replacer",
-      version="1.0.3",
+      version="1.0.4",
       description="Replace text in files",
-      url="http://github.com/yannicklm/replacer",
+      url="http://github.com/dmerejkowsky/replacer",
       author="Dimitri Merejkowky",
       author_email="d.merej@gmail.com",
       scripts=["bin/replacer"],
