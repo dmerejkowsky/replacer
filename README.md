@@ -1,5 +1,7 @@
 # replacer
 
+[![pypi](http://img.shields.io/pypi/v/qibuild.png)](https://pypi.python.org/pypi/replacer)
+
 Replace text in files.
 
 ## Requirements
