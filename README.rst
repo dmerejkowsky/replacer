@@ -38,7 +38,7 @@ Note that internally, we'll call Python with::
 
 for each line of every regular file found in the current working directory.
 
-This means you can use fancy backward references with `\1`
+This means you can use fancy backward references with `\\1`
 
 * By default hidden files, and files matching
   ``build-*, .git, .svn, *.py[co], *.[oa] , *.back, *~ , *.so, *.a``
