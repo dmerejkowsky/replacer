@@ -17,6 +17,9 @@ Install
 
 Install with ``pip`` as usual.
 
+Or, use the `AUR <https://aur.archlinux.org/packages/replacer/>`_
+on Arch Linux.
+
 Screenshot
 ----------
 
