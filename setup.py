@@ -5,7 +5,7 @@
 from setuptools import setup
 
 setup(name="replacer",
-      version="1.0.1",
+      version="1.0.3",
       description="Replace text in files",
       url="http://github.com/yannicklm/replacer",
       author="Dimitri Merejkowky",
