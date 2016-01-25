@@ -315,7 +315,7 @@ def main():
         help = "Enable debug output")
     option_parser.add_option("--backup",
         action = "store_true", dest = "backup",
-        help = "Create a backup for each file. This is the default")
+        help = "Create a backup for each file. By default, files are modified in place")
     option_parser.add_option("--go",
         action = "store_true", dest = "go",
         help = "Perform changes rather than just printing then")
