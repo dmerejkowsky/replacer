@@ -67,8 +67,8 @@ for a full list of options
 History
 --------
 
-First version was implemented in Perl/Bash in
-`ctafconf <https://github.com/cgestes/ctafconf/blob/78b92a60bc185b73f95418e3e913e33aae8799f6/bin/replacer>`_
+First version was implemented in Bash in
+`ctafconf <https://github.com/cgestes/ctafconf/blob/78b92a60bc185b73f95418e3e913e33aae8799f6/bin/replacer>`_.
 
 Then it was rewritten in Python in this
-`commit <https://github.com/cgestes/ctafconf/commit/73ea7320a593c1c31125ecff23c86b073f87ea26>`_
+`commit <https://github.com/cgestes/ctafconf/commit/73ea7320a593c1c31125ecff23c86b073f87ea26>`_.
