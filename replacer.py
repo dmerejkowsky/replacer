@@ -160,39 +160,6 @@ class PyContext(Context):
         self.displayed = True
 
 
-def find_in_file(opts, in_file, regexp):
-    """ display math """
-    # print "find in file:", in_file
-    in_fd = open(in_file, "r")
-    in_lines = in_fd.readlines()
-    in_fd.close()
-
-    if opts.get("pyctx"):
-        pyctx = PyContext(in_file)
-    else:
-        pyctx = Context(in_file)
-
-    display_header = True
-    for out_line, ln in zip(in_lines, range(len(in_lines))):
-        pyctx.search(out_line)
-        if re.search(regexp, out_line):
-            if display_header:
-                if not opts.get("quiet"):
-                    print()
-                    print(COLORS["bold"] + COLORS["light-blue"],
-                          "file:", os.path.relpath(in_file),
-                          COLORS["clear"])
-                display_header = False
-
-            pyctx.display()
-            out_line = out_line.rstrip()
-            match = re.search(regexp, out_line)
-            out_line_color = out_line[0:match.start()] + COLORS_REPLACE["word1"]
-            out_line_color = out_line_color + out_line[match.start():match.end()]
-            out_line_color = out_line_color + COLORS_REPLACE["line2"] + out_line[match.end():]
-            print("%s%s: %s%s%s" % (COLORS_REPLACE["line2start"], ln, COLORS_REPLACE["line2"], out_line_color, COLORS["clear"]))
-
-
 def replace_in_file(opts, in_file, regexp, repl):
     """
     Perfoms re.sub(regexp, repl, line) for each line in
@@ -252,27 +219,6 @@ def replace_in_file(opts, in_file, regexp, repl):
             print()
 
 
-def find_main(opts, args):
-    """ find main """
-    if len(args) < 1:
-        print("Wrong number of arguments")
-        print(__usage__)
-        sys.exit(2)
-
-    pattern = args[0]
-    regexp = re.compile(pattern)
-
-    def find_action(f):
-        return find_in_file(opts, f, regexp)
-
-    if len(args) > 1:
-        files = args[1:]
-        for f in files:
-            find_action(f)
-    else:
-        recurse_file(opts, os.getcwd(), find_action)
-
-
 def repl_main(opts, args):
     """ replacer main """
     if len(args) < 2:
@@ -327,9 +273,6 @@ def main(args=None):
     option_parser.add_option("--go",
                              action="store_true", dest="go",
                              help="Perform changes rather than just printing then")
-    option_parser.add_option("--find",
-                             action="store_true", dest="find",
-                             help="Only search for match")
     option_parser.add_option("--dry-run", "-n",
                              action="store_false", dest="go",
                              help="Do not change anything. This is the default")
@@ -365,10 +308,7 @@ def main(args=None):
     if opts.get("debug"):
         logging.basicConfig(level=logging.DEBUG)
 
-    if opts.get("find"):
-        find_main(opts, args)
-    else:
-        repl_main(opts, args)
+    repl_main(opts, args)
 
 
 if __name__ == "__main__":
