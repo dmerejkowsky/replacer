@@ -202,8 +202,8 @@ def replace_in_file(opts, in_file, regexp, repl):
     try:
         with open(in_file, "r") as in_fd:
             in_lines = in_fd.readlines()
-    except:
-        print("Cant open file: ", in_file)
+    except OSError as error:
+        print("Cant open file:", in_file, error)
         return
 
     out_lines = in_lines[:]
