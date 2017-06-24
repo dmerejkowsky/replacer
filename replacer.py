@@ -22,19 +22,9 @@ COLORS = {
     "clear": "\033[0m",
     "bold": "\033[1m",
     "underline": "\033[4m",
-
     "red": "\033[0;31m",
-    "light-red": "\033[1;31m",
-
     "green": "\033[0;32m",
-    "light-green": "\033[1;32m",
-
     "blue": "\033[0;34m",
-    "light-blue": "\033[1;34m",
-
-    "magenta": "\033[0;36m",
-    "light-magenta": "\033[1;36m",
-
 }
 
 FILTER_OUT = (
@@ -55,6 +45,13 @@ eg:
 
 Files matching %s are discarded.
 """ % (str(FILTER_OUT))
+
+
+def setup_colors(args):
+    auto_off = args.color == "auto" and not sys.stdout.isatty()
+    if args.color == "never" or auto_off:
+        for key in COLORS:
+            COLORS[key] = ""
 
 
 def is_binary(filename):
@@ -138,33 +135,50 @@ def walk_files(args, root, directory, action):
             action(entry)
 
 
-def display_one_diff(regexp, repl, in_line, out_line):
+def apply_replacements(line, replacements):
+    res = ""
+    i = 0
+    while i < len(line):
+        if i in replacements:
+            end, repl = replacements[i]
+            res += repl
+            i = end
+        else:
+            res += line[i]
+            i += 1
+    return res
 
-    in_line = in_line.strip()
-    out_line = out_line.strip()
-    match = re.search(regexp, in_line)
-    in_line_color = in_line[0:match.start()]
-    in_line_color += COLORS["red"] + COLORS["underline"]
-    in_line_color += in_line[match.start():match.end()]
-    in_line_color += COLORS["clear"]
-    in_line_color += in_line[match.end():]
-    colored_replacement = COLORS["green"] + COLORS["underline"]
-    colored_replacement += repl
-    colored_replacement += COLORS["clear"]
-    out_line_color = re.sub(regexp, colored_replacement, in_line)
 
-    print("%s--%s %s%s" % (COLORS_REPLACE["line1start"], COLORS_REPLACE["line1"], in_line_color, COLORS["clear"]))
-    print("%s++%s %s%s" % (COLORS_REPLACE["line2start"], COLORS_REPLACE["line2"], out_line_color, COLORS["clear"]))
+def get_replacements(line, regexp, repl):
+    in_replacements = dict()
+    out_replacements = dict()
+    for match in re.finditer(regexp, line):
+        in_repl = COLORS["red"] + COLORS["bold"] + COLORS["underline"]
+        in_repl += match.group() + COLORS["clear"]
+        in_replacements[match.start()] = (match.end(), in_repl)
+        full_repl = re.sub(regexp, repl, match.group())
+        out_repl = COLORS["green"] + COLORS["bold"] + COLORS["underline"]
+        out_repl += full_repl + COLORS["clear"]
+        out_replacements[match.start()] = (match.end(), out_repl)
+    return (in_replacements, out_replacements)
+
+
+def display_one_diff(line, regexp, repl):
+    in_replacements, out_replacements = get_replacements(line, regexp, repl)
+    in_color = apply_replacements(line, in_replacements)
+    out_color = apply_replacements(line, out_replacements)
+    print(COLORS["red"], "--", COLORS["clear"], in_color, end="", sep="")
+    print(COLORS["green"], "++", COLORS["clear"], out_color, end="", sep="")
     print()
 
 
 def display_diff(in_file, regexp, repl, in_lines, out_lines):
-    print(COLORS["bold"], COLORS["light-blue"], "Patching: ",
+    print(COLORS["bold"], COLORS["blue"], "Patching: ",
           COLORS["clear"], COLORS["bold"], os.path.relpath(in_file),
-          sep="")
+          COLORS["clear"], sep="")
     for (in_line, out_line) in zip(in_lines, out_lines):
         if in_line != out_line:
-            display_one_diff(regexp, repl, in_line, out_line)
+            display_one_diff(in_line, regexp, repl)
 
 
 def replace_in_file(args, in_file, regexp, repl):
@@ -202,7 +216,6 @@ def replace_in_file(args, in_file, regexp, repl):
         out_fd.close()
 
 
-
 def repl_main(args):
     """ replacer main """
     pattern = args.pattern
@@ -218,15 +231,6 @@ def repl_main(args):
     else:
         root = os.getcwd()
         walk_files(args, root, root, repl_action)
-
-    if not args.go and not args.quiet:
-        print()
-        print("To apply change, run again:")
-        print("$ %s %s --go\n" % (os.path.basename(sys.argv[0]),
-              ' '.join(sys.argv[1:])))
-        print("To backup altered files,",
-              "add '--backup' to the above command line.")
-        print()
 
 
 def main(args=None):
@@ -253,8 +257,9 @@ def main(args=None):
     parser.add_argument("--dry-run", "-n",
                         action="store_false", dest="go",
                         help="Do not change anything. This is the default")
-    parser.add_argument("--color", action="store_true", dest="color",
-                        help="Colorize output. This is the default")
+    parser.add_argument("--color", choices=["always", "never", "auto"],
+                        help="When to colorize the output. "
+                             "Default: when output is a tty")
     parser.add_argument("--no-color", action="store_false", dest="color",
                         help="Do not colorize output")
     parser.add_argument("--quiet", "-q", action="store_true", dest="quiet",
@@ -269,18 +274,12 @@ def main(args=None):
         skip_hidden=True,
         backup=False,
         go=False,
-        color=True,
+        color="auto",
         quiet=False,
         )
 
     args = parser.parse_args(args=args)
-
-    if not args.color or not sys.stdout.isatty():
-        for k in COLORS.keys():
-            COLORS[k] = ""
-        for k in COLORS_REPLACE.keys():
-            COLORS_REPLACE[k] = ""
-
+    setup_colors(args)
     repl_main(args)
 
 

@@ -1,6 +1,6 @@
 first line
 second line
 
-sub/foo: old is everywhere
+sub/foo: old is everywhere, old is old
 
 end line
