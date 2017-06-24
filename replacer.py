@@ -89,7 +89,7 @@ def recurse_file(args, directory, action):
 
     """
     for f in os.listdir(directory):
-        if args.no_hidden and f.startswith("."):
+        if args.skip_hidden and f.startswith("."):
             continue
         filter_out = False
         if not args.no_filter:
@@ -207,7 +207,7 @@ def main(args=None):
     """
     parser = ArgumentParser(usage=__usage__)
     parser.add_argument("--no-skip-hidden", action="store_false",
-                        dest="no_hidden",
+                        dest="skip_hidden",
                         help="Do not skip hidden files. "
                         "Use this if you know what you are doing...")
     parser.add_argument("--file-filter", dest="file_filter", action="append",
@@ -237,7 +237,7 @@ def main(args=None):
     parser.add_argument("paths", nargs="*")
 
     parser.set_defaults(
-        no_hidden=True,
+        skip_hidden=True,
         no_filter=False,
         backup=False,
         go=False,

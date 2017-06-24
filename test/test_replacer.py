@@ -38,3 +38,11 @@ def test_replace_in_files(capsys, test_path):
     # Now re-run with --go
     replacer.main(["old", "new", "--go"])
     assert test_path.joinpath("top.txt").text() == "Top: new is nice\n"
+
+
+def test_hidden(test_path):
+    replacer.main(["old", "new", "--go"])
+    assert "old" in test_path.joinpath(".hidden/hidden.txt").text()
+
+    replacer.main(["old", "new", "--go", "--no-skip-hidden"])
+    assert "new" in test_path.joinpath(".hidden/hidden.txt").text()
