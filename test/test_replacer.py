@@ -16,6 +16,14 @@ def test_path(tmpdir, monkeypatch):
     return dest
 
 
+def assert_replaced(filename):
+    assert "new" in path.Path(filename).text()
+
+
+def assert_not_replaced(filename):
+    assert "old" in path.Path(filename).text()
+
+
 def test_help(capsys):
     with pytest.raises(SystemExit) as e:
         replacer.main(["--help"])
@@ -33,22 +41,22 @@ def test_replace_in_files(capsys, test_path):
     assert "other.txt" not in stdout
 
     # Dry-run: files should not have changed:
-    assert test_path.joinpath("top.txt").text() == "Top: old is nice\n"
+    assert_not_replaced("top.txt")
 
     # Now re-run with --go
     replacer.main(["old", "new", "--go"])
-    assert test_path.joinpath("top.txt").text() == "Top: new is nice\n"
+    assert_replaced("top.txt")
 
 
 def test_hidden(test_path):
     replacer.main(["old", "new", "--go"])
-    assert "old" in test_path.joinpath(".hidden/hidden.txt").text()
+    assert_not_replaced(".hidden/hidden.txt")
 
     replacer.main(["old", "new", "--go", "--no-skip-hidden"])
-    assert "new" in test_path.joinpath(".hidden/hidden.txt").text()
+    assert_replaced(".hidden/hidden.txt")
 
 
 def test_include(test_path):
     replacer.main(["old", "new", "--go", "--include", "*.txt"])
-    assert "new" in test_path.joinpath("top.txt").text()
-    assert "new" not in test_path.joinpath("b_dir", "file.noext").text()
+    assert_replaced("top.txt")
+    assert_not_replaced("b_dir/file.noext")
