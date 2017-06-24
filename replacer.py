@@ -211,7 +211,7 @@ def main(args=None):
                         help="Do not skip hidden files. "
                         "Use this if you know what you are doing...")
     parser.add_argument("--include", dest="includes", action="append",
-                        help="Patterns to include when recursing files")
+                        help="Only replace in files matching theses patterns")
     parser.add_argument("--no-filter", action="store_true", dest="no_filter",
                         help="Do not skip files that match the filter")
     parser.add_argument("-d", "--debug", action="store_true", dest="debug",
