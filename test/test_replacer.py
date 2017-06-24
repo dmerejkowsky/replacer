@@ -14,7 +14,7 @@ def test_help(capsys):
     with pytest.raises(SystemExit) as e:
         replacer.main(["--help"])
     stdout, _ = capsys.readouterr()
-    assert "Usage" in stdout
+    assert "usage" in stdout
     assert(e.value.code) == 0
 
 

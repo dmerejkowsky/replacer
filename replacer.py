@@ -16,7 +16,7 @@ import re
 import random
 import fnmatch
 
-from optparse import OptionParser
+from argparse import ArgumentParser
 
 COLORS = {
     "clear": "\033[0m",
@@ -82,32 +82,32 @@ def is_binary(filename):
         return False
 
 
-def recurse_file(opts, directory, action):
+def recurse_file(args, directory, action):
     """
     Recusively go do the subdirectories of the directory,
     calling the action on each file
 
     """
     for f in os.listdir(directory):
-        if opts.get("no_hidden") and f.startswith("."):
+        if args.no_hidden and f.startswith("."):
             continue
         filter_out = False
-        if not opts.get("no_filter"):
+        if not args.no_filter:
             for fo in FILTER_OUT:
                 if fnmatch.fnmatch(f, fo):
                     filter_out = True
                     break
         if filter_out:
             continue
-        if opts.get("file_filter"):
+        if args.file_filter:
             filter_out = True
-            for fo in opts.get("file_filter"):
+            for fo in args.file_filter:
                 if fnmatch.fnmatch(f, fo):
                     filter_out = False
                     break
         f = os.path.join(directory, f)
         if os.path.isdir(f):
-            recurse_file(opts, f, action)
+            recurse_file(args, f, action)
         if os.path.isfile(f):
             if filter_out:
                 continue
@@ -116,7 +116,7 @@ def recurse_file(opts, directory, action):
             action(f)
 
 
-def replace_in_file(opts, in_file, regexp, repl):
+def replace_in_file(args, in_file, regexp, repl):
     """
     Perfoms re.sub(regexp, repl, line) for each line in
     in_file
@@ -142,12 +142,12 @@ def replace_in_file(opts, in_file, regexp, repl):
     if not diff:
         return
 
-    if not opts.get("quiet"):
+    if not args.quiet:
         print(COLORS["bold"], COLORS["light-blue"],
               "patching:", os.path.relpath(in_file),
               COLORS["clear"])
-    if opts.get("go"):
-        if opts.get("backup"):
+    if args.go:
+        if args.backup:
             rand_int = random.randint(100, 999)
             back_file = "%s-%i.back" % (in_file, rand_int)
             back_file_fd = open(back_file, "w")
@@ -157,7 +157,7 @@ def replace_in_file(opts, in_file, regexp, repl):
         out_fd.writelines(out_lines)
         out_fd.close()
 
-    if opts.get("quiet"):
+    if args.quiet:
         return
 
     for (in_line, out_line) in zip(in_lines, out_lines):
@@ -175,28 +175,22 @@ def replace_in_file(opts, in_file, regexp, repl):
             print()
 
 
-def repl_main(opts, args):
+def repl_main(args):
     """ replacer main """
-    if len(args) < 2:
-        print("Wrong number of arguments")
-        print(__usage__)
-        sys.exit(2)
-
-    pattern = args[0]
-    repl = args[1]
+    pattern = args.pattern
+    repl = args.replacement
     regexp = re.compile(pattern)
 
     def repl_action(f):
-        return replace_in_file(opts, f, regexp, repl)
+        return replace_in_file(args, f, regexp, repl)
 
-    if len(args) > 2:
-        files = args[2:]
-        for f in files:
+    if args.paths:
+        for f in args.paths:
             repl_action(f)
     else:
-        recurse_file(opts, os.getcwd(), repl_action)
+        recurse_file(args, os.getcwd(), repl_action)
 
-    if not opts.get("go") and not opts.get("quiet"):
+    if not args.go and not args.quiet:
         print()
         print("To apply change, run again:")
         print("$ %s %s --go\n" % (os.path.basename(sys.argv[0]),
@@ -211,35 +205,38 @@ def main(args=None):
     manages options when called from command line
 
     """
-    option_parser = OptionParser(usage=__usage__)
-    option_parser.add_option("--no-skip-hidden", action="store_false",
-                             dest="no_hidden",
-                             help="Do not skip hidden files. "
-                             "Use this if you know what you are doing...")
-    option_parser.add_option("--file-filter", dest="file_filter", action="append",
-                             help="File filter to apply (multiple filters can be specified)")
-    option_parser.add_option("--no-filter", action="store_true", dest="no_filter",
-                             help="Do not skip files that match the filter")
-    option_parser.add_option("-d", "--debug", action="store_true", dest="debug",
-                             help="Enable debug output")
-    option_parser.add_option("--backup",
-                             action="store_true", dest="backup",
-                             help="Create a backup for each file. "
-                                  "By default, files are modified in place")
-    option_parser.add_option("--go",
-                             action="store_true", dest="go",
-                             help="Perform changes rather than just printing then")
-    option_parser.add_option("--dry-run", "-n",
-                             action="store_false", dest="go",
-                             help="Do not change anything. This is the default")
-    option_parser.add_option("--color", action="store_true", dest="color",
-                             help="Colorize output. This is the default")
-    option_parser.add_option("--no-color", action="store_false", dest="color",
-                             help="Do not colorize output")
-    option_parser.add_option("--quiet", "-q", action="store_true", dest="quiet",
-                             help="Do not produce any output")
+    parser = ArgumentParser(usage=__usage__)
+    parser.add_argument("--no-skip-hidden", action="store_false",
+                        dest="no_hidden",
+                        help="Do not skip hidden files. "
+                        "Use this if you know what you are doing...")
+    parser.add_argument("--file-filter", dest="file_filter", action="append",
+                        help="File filter to apply (multiple filters can be specified)")
+    parser.add_argument("--no-filter", action="store_true", dest="no_filter",
+                        help="Do not skip files that match the filter")
+    parser.add_argument("-d", "--debug", action="store_true", dest="debug",
+                        help="Enable debug output")
+    parser.add_argument("--backup",
+                        action="store_true", dest="backup",
+                        help="Create a backup for each file. "
+                             "By default, files are modified in place")
+    parser.add_argument("--go",
+                        action="store_true", dest="go",
+                        help="Perform changes rather than just printing then")
+    parser.add_argument("--dry-run", "-n",
+                        action="store_false", dest="go",
+                        help="Do not change anything. This is the default")
+    parser.add_argument("--color", action="store_true", dest="color",
+                        help="Colorize output. This is the default")
+    parser.add_argument("--no-color", action="store_false", dest="color",
+                        help="Do not colorize output")
+    parser.add_argument("--quiet", "-q", action="store_true", dest="quiet",
+                        help="Do not produce any output")
+    parser.add_argument("pattern")
+    parser.add_argument("replacement")
+    parser.add_argument("paths", nargs="*")
 
-    option_parser.set_defaults(
+    parser.set_defaults(
         no_hidden=True,
         no_filter=False,
         backup=False,
@@ -249,17 +246,15 @@ def main(args=None):
         quiet=False,
         )
 
-    (opts_obj, args) = option_parser.parse_args(args=args)
+    args = parser.parse_args(args=args)
 
-    opts = vars(opts_obj)
-
-    if not opts.get("color") or not sys.stdout.isatty():
+    if not args.color or not sys.stdout.isatty():
         for k in COLORS.keys():
             COLORS[k] = ""
         for k in COLORS_REPLACE.keys():
             COLORS_REPLACE[k] = ""
 
-    repl_main(opts, args)
+    repl_main(args)
 
 
 if __name__ == "__main__":
