@@ -17,17 +17,29 @@ def test_path(tmpdir, monkeypatch):
 
 
 def assert_replaced(filename):
-    assert "new" in path.Path(filename).text()
+    as_path = path.Path(filename)
+    if replacer.is_binary(as_path):
+        assert b"new" in as_path.bytes()
+    else:
+        assert "new" in as_path.text()
 
 
 def assert_not_replaced(filename):
-    assert "old" in path.Path(filename).text()
+    as_path = path.Path(filename)
+    if replacer.is_binary(as_path):
+        assert b"old" in as_path.bytes()
+    else:
+        assert "old" in as_path.text()
 
 
-def ensure_matching_file(src):
+def ensure_matching_file(src, binary=False):
     src = path.Path(src)
-    src.parent.makedirs_p()
-    src.write_text("this is old")
+    if src.parent:
+        src.parent.makedirs_p()
+    if binary:
+        src.write_bytes(b"MAGIC\0old\xca\xff\xee")
+    else:
+        src.write_text("this is old")
 
 
 def test_help(capsys):
@@ -83,3 +95,9 @@ def test_exclude_directory(test_path):
     replacer.main(["old", "new", "--go", "--exclude", "node_modules/*"])
     assert_not_replaced(one)
     assert_not_replaced(two)
+
+
+def test_skip_binaries(test_path):
+    ensure_matching_file("foo.exe", binary=True)
+    replacer.main(["old", "new"])
+    assert_not_replaced("foo.exe")
