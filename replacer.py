@@ -147,6 +147,35 @@ def walk_files(args, root, directory, action):
             action(entry)
 
 
+def display_one_diff(regexp, repl, in_line, out_line):
+
+    in_line = in_line.strip()
+    out_line = out_line.strip()
+    match = re.search(regexp, in_line)
+    in_line_color = in_line[0:match.start()]
+    in_line_color += COLORS["red"] + COLORS["underline"]
+    in_line_color += in_line[match.start():match.end()]
+    in_line_color += COLORS["clear"]
+    in_line_color += in_line[match.end():]
+    colored_replacement = COLORS["green"] + COLORS["underline"]
+    colored_replacement += repl
+    colored_replacement += COLORS["clear"]
+    out_line_color = re.sub(regexp, colored_replacement, in_line)
+
+    print("%s--%s %s%s" % (COLORS_REPLACE["line1start"], COLORS_REPLACE["line1"], in_line_color, COLORS["clear"]))
+    print("%s++%s %s%s" % (COLORS_REPLACE["line2start"], COLORS_REPLACE["line2"], out_line_color, COLORS["clear"]))
+    print()
+
+
+def display_diff(in_file, regexp, repl, in_lines, out_lines):
+    print(COLORS["bold"], COLORS["light-blue"], "Patching: ",
+          COLORS["clear"], COLORS["bold"], os.path.relpath(in_file),
+          sep="")
+    for (in_line, out_line) in zip(in_lines, out_lines):
+        if in_line != out_line:
+            display_one_diff(regexp, repl, in_line, out_line)
+
+
 def replace_in_file(args, in_file, regexp, repl):
     """
     Perfoms re.sub(regexp, repl, line) for each line in
@@ -163,20 +192,13 @@ def replace_in_file(args, in_file, regexp, repl):
     out_lines = in_lines[:]
     out_lines = [re.sub(regexp, repl, l) for l in in_lines]
 
-    diff = False
-
-    # See if there's a diff first:
-    for (in_line, out_line) in zip(in_lines, out_lines):
-        if in_line != out_line:
-            diff = True
-
-    if not diff:
+    # Exit early if there's no diff:
+    if in_lines == out_lines:
         return
 
     if not args.quiet:
-        print(COLORS["bold"], COLORS["light-blue"],
-              "patching:", os.path.relpath(in_file),
-              COLORS["clear"])
+        display_diff(in_file, regexp, repl, in_lines, out_lines)
+
     if args.go:
         if args.backup:
             rand_int = random.randint(100, 999)
@@ -188,22 +210,6 @@ def replace_in_file(args, in_file, regexp, repl):
         out_fd.writelines(out_lines)
         out_fd.close()
 
-    if args.quiet:
-        return
-
-    for (in_line, out_line) in zip(in_lines, out_lines):
-        if in_line != out_line:
-            in_line = in_line.strip()
-            out_line = out_line.strip()
-            match = re.search(regexp, in_line)
-            in_line_color = in_line[0:match.start()] + COLORS_REPLACE["word1"]
-            in_line_color = in_line_color + in_line[match.start():match.end()]
-            in_line_color = in_line_color + COLORS_REPLACE["line1"] + in_line[match.end():]
-            out_line_color = re.sub(regexp, COLORS_REPLACE["word2"] + repl + COLORS_REPLACE["line2"], in_line)
-
-            print("%s--%s %s%s" % (COLORS_REPLACE["line1start"], COLORS_REPLACE["line1"], in_line_color, COLORS["clear"]))
-            print("%s++%s %s%s" % (COLORS_REPLACE["line2start"], COLORS_REPLACE["line2"], out_line_color, COLORS["clear"]))
-            print()
 
 
 def repl_main(args):
