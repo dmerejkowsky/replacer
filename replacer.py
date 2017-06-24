@@ -14,7 +14,6 @@ import sys
 import os
 import re
 import random
-import logging
 import fnmatch
 
 from optparse import OptionParser
@@ -70,8 +69,6 @@ eg:
 Files matching %s are discarded.
 """ % (str(FILTER_OUT))
 
-LOGGER = logging.getLogger("replacer")
-
 
 def is_binary(filename):
     """ Returns True if the file is binary
@@ -94,13 +91,11 @@ def recurse_file(opts, directory, action):
     """
     for f in os.listdir(directory):
         if opts.get("no_hidden") and f.startswith("."):
-            LOGGER.info("filter hidden  : %s/%s", directory, f)
             continue
         filter_out = False
         if not opts.get("no_filter"):
             for fo in FILTER_OUT:
                 if fnmatch.fnmatch(f, fo):
-                    LOGGER.info("filter %s: %s/%s", fo, directory, f)
                     filter_out = True
                     break
         if filter_out:
@@ -304,9 +299,6 @@ def main(args=None):
             COLORS[k] = ""
         for k in COLORS_REPLACE.keys():
             COLORS_REPLACE[k] = ""
-
-    if opts.get("debug"):
-        logging.basicConfig(level=logging.DEBUG)
 
     repl_main(opts, args)
 
