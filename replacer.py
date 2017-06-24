@@ -47,11 +47,8 @@ COLORS_REPLACE = {
 }
 
 FILTER_OUT = (
-    "build-*",
     ".git",
     ".svn",
-    "*.py[co]",
-    "*.[oa]",
     "*.back",
     "*~",
     "*.so",
