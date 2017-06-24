@@ -226,8 +226,6 @@ def main(args=None):
                         help="Only replace in files matching theses patterns")
     parser.add_argument("--exclude", dest="excludes", action="append",
                         help="Ignore files matching theses patterns")
-    parser.add_argument("-d", "--debug", action="store_true", dest="debug",
-                        help="Enable debug output")
     parser.add_argument("--backup",
                         action="store_true", dest="backup",
                         help="Create a backup for each file. "
@@ -255,7 +253,6 @@ def main(args=None):
         backup=False,
         go=False,
         color=True,
-        debug=False,
         quiet=False,
         )
 
