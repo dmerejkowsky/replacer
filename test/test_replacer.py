@@ -5,9 +5,15 @@ import pytest
 
 
 @pytest.fixture
-def tmp_path(tmpdir, monkeypatch):
-    monkeypatch.chdir(tmpdir)
-    return path.Path(tmpdir)
+def test_path(tmpdir, monkeypatch):
+    tmp_path = path.Path(tmpdir)
+    this_path = path.Path(__file__).parent
+    src = this_path.joinpath("test_path")
+    dest = tmp_path.joinpath("test_path")
+    src.copytree(dest)
+
+    monkeypatch.chdir(dest)
+    return dest
 
 
 def test_help(capsys):
@@ -18,25 +24,17 @@ def test_help(capsys):
     assert(e.value.code) == 0
 
 
-def test_replace_in_files(capsys, tmp_path):
-    a_path = tmp_path.joinpath("a")
-    a_path.mkdir()
-    foo_path = a_path.joinpath("foo.txt")
-    foo_path.write_text("This is bar")
-    spam_path = a_path.joinpath("spam")
-    spam_path.write_text("bar is good")
-    other_path = a_path.joinpath("other.txt")
-    other_path.write_text("Other contents")
+def test_replace_in_files(capsys, test_path):
 
-    replacer.main(["bar", "baz"])
+    replacer.main(["old", "new"])
     stdout, _ = capsys.readouterr()
 
-    assert "a/foo.txt" in stdout
-    assert "a/other.txt" not in stdout
+    assert "top.txt" in stdout
+    assert "other.txt" not in stdout
 
     # Dry-run: files should not have changed:
-    assert foo_path.text() == "This is bar"
+    assert test_path.joinpath("top.txt").text() == "Top: old is nice\n"
 
     # Now re-run with --go
-    replacer.main(["bar", "baz", "--go"])
-    assert foo_path.text() == "This is baz"
+    replacer.main(["old", "new", "--go"])
+    assert test_path.joinpath("top.txt").text() == "Top: new is nice\n"
