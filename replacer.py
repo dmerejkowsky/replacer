@@ -115,11 +115,10 @@ def walk_files(args, root, directory, action):
                     break
         full_path = os.path.join(directory, entry)
         relpath = os.path.relpath(full_path)
-        if args.excludes:
-            for fo in args.excludes:
-                if fnmatch.fnmatch(relpath, fo):
-                    filter_out = True
-                    break
+        for fo in args.excludes:
+            if fnmatch.fnmatch(relpath, fo):
+                filter_out = True
+                break
         entry = os.path.join(directory, entry)
         if os.path.isdir(entry):
             walk_files(args, root, entry, action)
@@ -253,6 +252,8 @@ def main(args=None):
     parser.add_argument("paths", nargs="*")
 
     parser.set_defaults(
+        includes=list(),
+        excludes=list(),
         skip_hidden=True,
         backup=False,
         go=False,
