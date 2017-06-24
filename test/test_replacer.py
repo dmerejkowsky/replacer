@@ -46,3 +46,9 @@ def test_hidden(test_path):
 
     replacer.main(["old", "new", "--go", "--no-skip-hidden"])
     assert "new" in test_path.joinpath(".hidden/hidden.txt").text()
+
+
+def test_include(test_path):
+    replacer.main(["old", "new", "--go", "--include", "*.txt"])
+    assert "new" in test_path.joinpath("top.txt").text()
+    assert "new" not in test_path.joinpath("b_dir", "file.noext").text()

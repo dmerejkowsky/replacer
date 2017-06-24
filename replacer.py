@@ -99,9 +99,9 @@ def recurse_file(args, directory, action):
                     break
         if filter_out:
             continue
-        if args.file_filter:
+        if args.includes:
             filter_out = True
-            for fo in args.file_filter:
+            for fo in args.includes:
                 if fnmatch.fnmatch(f, fo):
                     filter_out = False
                     break
@@ -210,8 +210,8 @@ def main(args=None):
                         dest="skip_hidden",
                         help="Do not skip hidden files. "
                         "Use this if you know what you are doing...")
-    parser.add_argument("--file-filter", dest="file_filter", action="append",
-                        help="File filter to apply (multiple filters can be specified)")
+    parser.add_argument("--include", dest="includes", action="append",
+                        help="Patterns to include when recursing files")
     parser.add_argument("--no-filter", action="store_true", dest="no_filter",
                         help="Do not skip files that match the filter")
     parser.add_argument("-d", "--debug", action="store_true", dest="debug",
