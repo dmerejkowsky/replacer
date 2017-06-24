@@ -304,7 +304,7 @@ def repl_main(opts, args):
         print()
 
 
-def main():
+def main(args=None):
     """
     manages options when called from command line
 
@@ -352,7 +352,7 @@ def main():
         quiet=False,
         pyctx=True)
 
-    (opts_obj, args) = option_parser.parse_args()
+    (opts_obj, args) = option_parser.parse_args(args=args)
 
     opts = vars(opts_obj)
 
