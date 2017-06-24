@@ -10,12 +10,16 @@ setup(name="replacer",
       url="http://github.com/dmerejkowsky/replacer",
       author="Dimitri Merejkowky",
       author_email="d.merej@gmail.com",
-      scripts=["bin/replacer"],
       license="BSD",
+      py_modules=["replacer"],
       classifiers=[
           "Environment :: Console",
           "License :: OSI Approved :: BSD License",
           "Programming Language :: Python",
           "Topic :: System :: Shells",
-    ]
-)
+      ],
+      entry_points={
+        "console_scripts": [
+          "replacer = replacer:main"
+        ]
+      })
