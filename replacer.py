@@ -220,10 +220,12 @@ def replace_in_file(opts, in_file, regexp, repl):
         return
 
     if not opts.get("quiet"):
-        print(COLORS["bold"] + COLORS["light-blue"] + "patching: " + os.path.relpath(in_file) + COLORS["clear"])
+        print(COLORS["bold"], COLORS["light-blue"],
+              "patching:", os.path.relpath(in_file),
+              COLORS["clear"])
     if opts.get("go"):
         if opts.get("backup"):
-            rand_int = random.randint(100,999)
+            rand_int = random.randint(100, 999)
             back_file = "%s-%i.back" % (in_file, rand_int)
             back_file_fd = open(back_file, "w")
             back_file_fd.writelines(in_lines)
@@ -237,17 +239,18 @@ def replace_in_file(opts, in_file, regexp, repl):
 
     for (in_line, out_line) in zip(in_lines, out_lines):
         if in_line != out_line:
-            in_line  = in_line.strip()
+            in_line = in_line.strip()
             out_line = out_line.strip()
-            match    = re.search(regexp, in_line)
-            in_line_color  = in_line[0:match.start()] + COLORS_REPLACE["word1"]
-            in_line_color  = in_line_color + in_line[match.start():match.end()]
-            in_line_color  = in_line_color + COLORS_REPLACE["line1"] + in_line[match.end():]
+            match = re.search(regexp, in_line)
+            in_line_color = in_line[0:match.start()] + COLORS_REPLACE["word1"]
+            in_line_color = in_line_color + in_line[match.start():match.end()]
+            in_line_color = in_line_color + COLORS_REPLACE["line1"] + in_line[match.end():]
             out_line_color = re.sub(regexp, COLORS_REPLACE["word2"] + repl + COLORS_REPLACE["line2"], in_line)
 
             print("%s--%s %s%s" % (COLORS_REPLACE["line1start"], COLORS_REPLACE["line1"], in_line_color, COLORS["clear"]))
             print("%s++%s %s%s" % (COLORS_REPLACE["line2start"], COLORS_REPLACE["line2"], out_line_color, COLORS["clear"]))
             print()
+
 
 def find_main(opts, args):
     """ find main """
@@ -270,7 +273,6 @@ def find_main(opts, args):
         recurse_file(opts, os.getcwd(), find_action)
 
 
-
 def repl_main(opts, args):
     """ replacer main """
     if len(args) < 2:
@@ -279,8 +281,8 @@ def repl_main(opts, args):
         sys.exit(2)
 
     pattern = args[0]
-    repl    = args[1]
-    regexp  = re.compile(pattern)
+    repl = args[1]
+    regexp = re.compile(pattern)
 
     def repl_action(f):
         return replace_in_file(opts, f, regexp, repl)
@@ -295,8 +297,10 @@ def repl_main(opts, args):
     if not opts.get("go") and not opts.get("quiet"):
         print()
         print("To apply change, run again:")
-        print("$ %s %s --go\n" % (os.path.basename(sys.argv[0]), ' '.join(sys.argv[1:])))
-        print("To backup altered files, add '--backup' to the above command line.")
+        print("$ %s %s --go\n" % (os.path.basename(sys.argv[0]),
+              ' '.join(sys.argv[1:])))
+        print("To backup altered files,",
+              "add '--backup' to the above command line.")
         print()
 
 
@@ -305,51 +309,48 @@ def main():
     manages options when called from command line
 
     """
-    option_parser = OptionParser(usage = __usage__)
-    option_parser.add_option("--no-skip-hidden",
-        action = "store_false", dest = "no_hidden",
-        help = "Do not skip hidden files. Use this if you know what you are doing...")
-    option_parser.add_option("--file-filter", dest = "file_filter", action = "append",
-                             help = "File filter to apply (multiple filters can be specified)")
-    option_parser.add_option("--no-filter", action = "store_true", dest = "no_filter",
-                             help = "Do not skip files that match the filter")
-    option_parser.add_option("-d", "--debug",
-        action = "store_true", dest = "debug",
-        help = "Enable debug output")
+    option_parser = OptionParser(usage=__usage__)
+    option_parser.add_option("--no-skip-hidden", action="store_false",
+                             dest="no_hidden",
+                             help="Do not skip hidden files. "
+                             "Use this if you know what you are doing...")
+    option_parser.add_option("--file-filter", dest="file_filter", action="append",
+                             help="File filter to apply (multiple filters can be specified)")
+    option_parser.add_option("--no-filter", action="store_true", dest="no_filter",
+                             help="Do not skip files that match the filter")
+    option_parser.add_option("-d", "--debug", action="store_true", dest="debug",
+                             help="Enable debug output")
     option_parser.add_option("--backup",
-        action = "store_true", dest = "backup",
-        help = "Create a backup for each file. By default, files are modified in place")
+                             action="store_true", dest="backup",
+                             help="Create a backup for each file. "
+                                  "By default, files are modified in place")
     option_parser.add_option("--go",
-        action = "store_true", dest = "go",
-        help = "Perform changes rather than just printing then")
+                             action="store_true", dest="go",
+                             help="Perform changes rather than just printing then")
     option_parser.add_option("--find",
-        action = "store_true", dest = "find",
-        help = "Only search for match")
+                             action="store_true", dest="find",
+                             help="Only search for match")
     option_parser.add_option("--dry-run", "-n",
-        action = "store_false", dest = "go",
-        help = "Do not change anything. This is the default")
-    option_parser.add_option("--color",
-        action = "store_false", dest = "color",
-        help = "Colorize output. This is the default")
-    option_parser.add_option("--no-color",
-        action = "store_false", dest = "color",
-        help = "Do not colorize output")
-    option_parser.add_option("--quiet", "-q",
-        action = "store_true", dest = "quiet",
-        help = "Do not produce any output")
-    option_parser.add_option("--no-py-ctx",
-        action = "store_false", dest = "pyctx",
-        help = "Do not use the python context")
+                             action="store_false", dest="go",
+                             help="Do not change anything. This is the default")
+    option_parser.add_option("--color", action="store_false", dest="color",
+                             help="Colorize output. This is the default")
+    option_parser.add_option("--no-color", action="store_false", dest="color",
+                             help="Do not colorize output")
+    option_parser.add_option("--quiet", "-q", action="store_true", dest="quiet",
+                             help="Do not produce any output")
+    option_parser.add_option("--no-py-ctx", action="store_false", dest="pyctx",
+                             help="Do not use the python context")
 
     option_parser.set_defaults(
-        no_hidden = True,
-        no_filter = False,
-        backup    = False,
-        go        = False,
-        color     = True,
-        debug     = False,
-        quiet     = False,
-        pyctx     = True)
+        no_hidden=True,
+        no_filter=False,
+        backup=False,
+        go=False,
+        color=True,
+        debug=False,
+        quiet=False,
+        pyctx=True)
 
     (opts_obj, args) = option_parser.parse_args()
 
@@ -368,7 +369,6 @@ def main():
         find_main(opts, args)
     else:
         repl_main(opts, args)
-
 
 
 if __name__ == "__main__":
