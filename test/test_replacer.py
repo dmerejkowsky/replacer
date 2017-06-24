@@ -101,3 +101,9 @@ def test_skip_binaries(test_path):
     ensure_matching_file("foo.exe", binary=True)
     replacer.main(["old", "new"])
     assert_not_replaced("foo.exe")
+
+
+def test_backup(test_path):
+    replacer.main(["old", "new", "--go", "--backup"])
+    top_backup = test_path.files("*.back")[0]
+    assert "old" in top_backup.text()

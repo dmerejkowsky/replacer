@@ -181,6 +181,13 @@ def display_diff(in_file, regexp, repl, in_lines, out_lines):
             display_one_diff(in_line, regexp, repl)
 
 
+def backup(filename, lines):
+    rand_int = random.randint(100, 999)
+    backup_name = "%s-%i.back" % (filename, rand_int)
+    with open(backup_name, "w") as fd:
+        fd.writelines(lines)
+
+
 def replace_in_file(args, in_file, regexp, repl):
     """
     Perfoms re.sub(regexp, repl, line) for each line in
@@ -204,16 +211,14 @@ def replace_in_file(args, in_file, regexp, repl):
     if not args.quiet:
         display_diff(in_file, regexp, repl, in_lines, out_lines)
 
-    if args.go:
-        if args.backup:
-            rand_int = random.randint(100, 999)
-            back_file = "%s-%i.back" % (in_file, rand_int)
-            back_file_fd = open(back_file, "w")
-            back_file_fd.writelines(in_lines)
-            back_file_fd.close()
-        out_fd = open(in_file, "w")
-        out_fd.writelines(out_lines)
-        out_fd.close()
+    if not args.go:
+        return
+
+    if args.backup:
+        backup(in_file, in_lines)
+
+    with open(in_file, "w") as fd:
+        fd.writelines(out_lines)
 
 
 def repl_main(args):
