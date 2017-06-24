@@ -357,9 +357,9 @@ def main(args=None):
     opts = vars(opts_obj)
 
     if not opts.get("color") or not sys.stdout.isatty():
-        for k in COLORS.iterkeys():
+        for k in COLORS.keys():
             COLORS[k] = ""
-        for k in COLORS_REPLACE.iterkeys():
+        for k in COLORS_REPLACE.keys():
             COLORS_REPLACE[k] = ""
 
     if opts.get("debug"):
