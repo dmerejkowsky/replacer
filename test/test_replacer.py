@@ -24,6 +24,12 @@ def assert_not_replaced(filename):
     assert "old" in path.Path(filename).text()
 
 
+def ensure_matching_file(src):
+    src = path.Path(src)
+    src.parent.makedirs_p()
+    src.write_text("this is old")
+
+
 def test_help(capsys):
     with pytest.raises(SystemExit) as e:
         replacer.main(["--help"])
@@ -69,5 +75,11 @@ def test_exclude_extension(test_path):
 
 
 def test_exclude_directory(test_path):
-    replacer.main(["old", "new", "--go", "--exclude", "a_dir/*"])
-    assert_not_replaced("a_dir/sub/foo.txt")
+    one = "node_modules/one.js"
+    two = "packages/foo/node_modules/two.js"
+    for f in one, two:
+        ensure_matching_file(f)
+
+    replacer.main(["old", "new", "--go", "--exclude", "node_modules/*"])
+    assert_not_replaced(one)
+    assert_not_replaced(two)
