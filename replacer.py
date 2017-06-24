@@ -333,7 +333,7 @@ def main():
     option_parser.add_option("--dry-run", "-n",
                              action="store_false", dest="go",
                              help="Do not change anything. This is the default")
-    option_parser.add_option("--color", action="store_false", dest="color",
+    option_parser.add_option("--color", action="store_true", dest="color",
                              help="Colorize output. This is the default")
     option_parser.add_option("--no-color", action="store_false", dest="color",
                              help="Do not colorize output")
