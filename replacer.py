@@ -37,15 +37,6 @@ COLORS = {
 
 }
 
-COLORS_REPLACE = {
-    "line1": COLORS["clear"],
-    "line2": COLORS["clear"],
-    "line1start": COLORS["clear"] + COLORS["light-red"],
-    "line2start": COLORS["clear"] + COLORS["light-green"],
-    "word1": COLORS["clear"] + COLORS["underline"] + COLORS["light-red"],
-    "word2": COLORS["clear"] + COLORS["underline"] + COLORS["light-green"],
-}
-
 FILTER_OUT = (
     ".git",
     ".svn",
