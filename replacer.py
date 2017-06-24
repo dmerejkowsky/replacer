@@ -89,6 +89,15 @@ def recurse_file(args, root, directory, action):
 
     """
     for f in os.listdir(directory):
+        skip_this_dir = False
+        if os.path.isdir(f):
+            for exclude in args.excludes:
+                if "/" in exclude:
+                    root = exclude.split("/")[0]
+                    if f == root:
+                        skip_this_dir = True
+        if skip_this_dir:
+            continue
         if args.skip_hidden and f.startswith("."):
             continue
         filter_out = False
