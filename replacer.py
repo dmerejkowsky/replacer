@@ -20,44 +20,44 @@ import fnmatch
 from optparse import OptionParser
 
 COLORS = {
-    "clear"         : "\033[0m"  ,
-    "bold"          : "\033[1m"  ,
-    "underline"     : "\033[4m"  ,
+    "clear": "\033[0m",
+    "bold": "\033[1m",
+    "underline": "\033[4m",
 
-    "red"           : "\033[0;31m" ,
-    "light-red"     : "\033[1;31m" ,
+    "red": "\033[0;31m",
+    "light-red": "\033[1;31m",
 
-    "green"         : "\033[0;32m" ,
-    "light-green"   : "\033[1;32m" ,
+    "green": "\033[0;32m",
+    "light-green": "\033[1;32m",
 
-    "blue"          : "\033[0;34m" ,
-    "light-blue"    : "\033[1;34m" ,
+    "blue": "\033[0;34m",
+    "light-blue": "\033[1;34m",
 
-    "magenta"       : "\033[0;36m" ,
-    "light-magenta" : "\033[1;36m" ,
+    "magenta": "\033[0;36m",
+    "light-magenta": "\033[1;36m",
 
 }
 
 COLORS_REPLACE = {
-    "pyctx" : COLORS["clear"] + COLORS["light-magenta"],
-    "line1" : COLORS["clear"],
-    "line2" : COLORS["clear"],
-    "line1start" : COLORS["clear"] + COLORS["light-red"],
-    "line2start" : COLORS["clear"] + COLORS["light-green"],
-    "word1" : COLORS["clear"] + COLORS["underline"] + COLORS["light-red"],
-    "word2" : COLORS["clear"] + COLORS["underline"] + COLORS["light-green"],
+    "pyctx": COLORS["clear"] + COLORS["light-magenta"],
+    "line1": COLORS["clear"],
+    "line2": COLORS["clear"],
+    "line1start": COLORS["clear"] + COLORS["light-red"],
+    "line2start": COLORS["clear"] + COLORS["light-green"],
+    "word1": COLORS["clear"] + COLORS["underline"] + COLORS["light-red"],
+    "word2": COLORS["clear"] + COLORS["underline"] + COLORS["light-green"],
 }
 
 FILTER_OUT = (
-    "build-*" ,
-    ".git"    ,
-    ".svn"    ,
+    "build-*",
+    ".git",
+    ".svn",
     "*.py[co]",
-    "*.[oa]"  ,
-    "*.back"  ,
-    "*~"      ,
-    "*.so"    ,
-    "*.a"
+    "*.[oa]",
+    "*.back",
+    "*~",
+    "*.so",
+    "*.a",
 )
 
 __usage__ = """
@@ -72,6 +72,7 @@ Files matching %s are discarded.
 
 LOGGER = logging.getLogger("replacer")
 
+
 def is_binary(filename):
     """ Returns True if the file is binary
 
@@ -83,6 +84,7 @@ def is_binary(filename):
         if b'\0' in data:
             return True
         return False
+
 
 def recurse_file(opts, directory, action):
     """
@@ -119,32 +121,32 @@ def recurse_file(opts, directory, action):
                 continue
             action(f)
 
+
 class Context:
     """ regexp context """
     def __init__(self, filename):
         self.filename = filename
 
-    #VIRTUAL
     def search(self, line):
         """ search for a context line """
         pass
 
-    #VIRTUAL
     def display(self):
         """ display a context if needed """
         pass
 
+
 class PyContext(Context):
     def __init__(self, filename):
         Context.__init__(self, filename)
-        self.regexp     = re.compile("[ \t]*def[ \t].*\(.*\)[ \t]*:")
-        self.match      = None
-        self.displayed  = False
+        self.regexp = re.compile("[ \t]*def[ \t].*\(.*\)[ \t]*:")
+        self.match = None
+        self.displayed = False
 
     def search(self, line):
         """ search for a function or class name """
         if self.regexp.search(line):
-            self.match     = line
+            self.match = line
             self.displayed = False
 
     def display(self):
@@ -153,12 +155,14 @@ class PyContext(Context):
             return
         if not self.match:
             return
-        print("%sIn: %s%s" % (COLORS_REPLACE["pyctx"], self.match.strip(), COLORS["clear"]))
+        print("%sIn: %s%s" % (COLORS_REPLACE["pyctx"],
+              self.match.strip(), COLORS["clear"]))
         self.displayed = True
+
 
 def find_in_file(opts, in_file, regexp):
     """ display math """
-    #print "find in file:", in_file
+    # print "find in file:", in_file
     in_fd = open(in_file, "r")
     in_lines = in_fd.readlines()
     in_fd.close()
@@ -175,16 +179,19 @@ def find_in_file(opts, in_file, regexp):
             if display_header:
                 if not opts.get("quiet"):
                     print()
-                    print(COLORS["bold"] + COLORS["light-blue"] + "file: " + os.path.relpath(in_file) + COLORS["clear"])
+                    print(COLORS["bold"] + COLORS["light-blue"],
+                          "file:", os.path.relpath(in_file),
+                          COLORS["clear"])
                 display_header = False
 
             pyctx.display()
             out_line = out_line.rstrip()
-            match    = re.search(regexp, out_line)
-            out_line_color  = out_line[0:match.start()] + COLORS_REPLACE["word1"]
-            out_line_color  = out_line_color + out_line[match.start():match.end()]
-            out_line_color  = out_line_color + COLORS_REPLACE["line2"] + out_line[match.end():]
+            match = re.search(regexp, out_line)
+            out_line_color = out_line[0:match.start()] + COLORS_REPLACE["word1"]
+            out_line_color = out_line_color + out_line[match.start():match.end()]
+            out_line_color = out_line_color + COLORS_REPLACE["line2"] + out_line[match.end():]
             print("%s%s: %s%s%s" % (COLORS_REPLACE["line2start"], ln, COLORS_REPLACE["line2"], out_line_color, COLORS["clear"]))
+
 
 def replace_in_file(opts, in_file, regexp, repl):
     """
