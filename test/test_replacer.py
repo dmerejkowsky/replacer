@@ -60,3 +60,9 @@ def test_include(test_path):
     replacer.main(["old", "new", "--go", "--include", "*.txt"])
     assert_replaced("top.txt")
     assert_not_replaced("b_dir/file.noext")
+
+
+def test_exclude(test_path):
+    replacer.main(["old", "new", "--go", "--exclude", "*.txt"])
+    assert_not_replaced("top.txt")
+    assert_replaced("b_dir/file.noext")

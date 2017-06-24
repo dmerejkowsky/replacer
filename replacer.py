@@ -104,6 +104,11 @@ def recurse_file(args, directory, action):
                 if fnmatch.fnmatch(f, fo):
                     filter_out = False
                     break
+        if args.excludes:
+            for fo in args.excludes:
+                if fnmatch.fnmatch(f, fo):
+                    filter_out = True
+                    break
         f = os.path.join(directory, f)
         if os.path.isdir(f):
             recurse_file(args, f, action)
@@ -211,6 +216,8 @@ def main(args=None):
                         "Use this if you know what you are doing...")
     parser.add_argument("--include", dest="includes", action="append",
                         help="Only replace in files matching theses patterns")
+    parser.add_argument("--exclude", dest="excludes", action="append",
+                        help="Ignore files matching theses patterns")
     parser.add_argument("-d", "--debug", action="store_true", dest="debug",
                         help="Enable debug output")
     parser.add_argument("--backup",
