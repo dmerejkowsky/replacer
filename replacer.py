@@ -82,7 +82,7 @@ def is_binary(filename):
         return False
 
 
-def recurse_file(args, directory, action):
+def recurse_file(args, root, directory, action):
     """
     Recusively go do the subdirectories of the directory,
     calling the action on each file
@@ -104,14 +104,16 @@ def recurse_file(args, directory, action):
                 if fnmatch.fnmatch(f, fo):
                     filter_out = False
                     break
+        full_path = os.path.join(directory, f)
+        relpath = os.path.relpath(full_path)
         if args.excludes:
             for fo in args.excludes:
-                if fnmatch.fnmatch(f, fo):
+                if fnmatch.fnmatch(relpath, fo):
                     filter_out = True
                     break
         f = os.path.join(directory, f)
         if os.path.isdir(f):
-            recurse_file(args, f, action)
+            recurse_file(args, root, f, action)
         if os.path.isfile(f):
             if filter_out:
                 continue
@@ -192,7 +194,8 @@ def repl_main(args):
         for f in args.paths:
             repl_action(f)
     else:
-        recurse_file(args, os.getcwd(), repl_action)
+        root = os.getcwd()
+        recurse_file(args, root, root, repl_action)
 
     if not args.go and not args.quiet:
         print()
