@@ -79,6 +79,48 @@ def is_binary(filename):
         return False
 
 
+def is_excluded_directory(args, entry):
+    if os.path.isdir(entry):
+        for exclude in args.excludes:
+            if "/" in exclude:
+                root = exclude.split("/")[0]
+                if entry == root:
+                    return True
+
+
+def is_hidden(args, entry):
+    if args.skip_hidden and entry.startswith("."):
+        return True
+
+
+def is_in_default_excludes(entry):
+    for fo in FILTER_OUT:
+        if fnmatch.fnmatch(entry, fo):
+            return True
+
+
+def is_included(args, entry):
+    if not args.includes:
+        return True
+
+    for fo in args.includes:
+        if fnmatch.fnmatch(entry, fo):
+            return True
+
+    # --include was used, and no match was found,
+    # skip this entry:
+    return False
+
+
+def is_excluded(args, entry, directory):
+    full_path = os.path.join(directory, entry)
+    relpath = os.path.relpath(full_path)
+    for fo in args.excludes:
+        if fnmatch.fnmatch(relpath, fo):
+            return True
+    return False
+
+
 def walk_files(args, root, directory, action):
     """
     Recusively go do the subdirectories of the directory,
@@ -86,42 +128,20 @@ def walk_files(args, root, directory, action):
 
     """
     for entry in os.listdir(directory):
-        skip_this_dir = False
-        if os.path.isdir(entry):
-            for exclude in args.excludes:
-                if "/" in exclude:
-                    root = exclude.split("/")[0]
-                    if entry == root:
-                        skip_this_dir = True
-        if skip_this_dir:
+        if is_hidden(args, entry):
             continue
-        if args.skip_hidden and entry.startswith("."):
+        if is_excluded_directory(args, entry):
             continue
-        filter_out = False
-        for fo in FILTER_OUT:
-            if fnmatch.fnmatch(entry, fo):
-                filter_out = True
-                break
-        if filter_out:
+        if is_in_default_excludes(entry):
             continue
-        if args.includes:
-            filter_out = True
-            for fo in args.includes:
-                if fnmatch.fnmatch(entry, fo):
-                    filter_out = False
-                    break
-        full_path = os.path.join(directory, entry)
-        relpath = os.path.relpath(full_path)
-        for fo in args.excludes:
-            if fnmatch.fnmatch(relpath, fo):
-                filter_out = True
-                break
+        if not is_included(args, entry):
+            continue
+        if is_excluded(args, entry, directory):
+            continue
         entry = os.path.join(directory, entry)
         if os.path.isdir(entry):
             walk_files(args, root, entry, action)
         if os.path.isfile(entry):
-            if filter_out:
-                continue
             if is_binary(entry):
                 continue
             action(entry)
