@@ -38,7 +38,6 @@ COLORS = {
 }
 
 COLORS_REPLACE = {
-    "pyctx": COLORS["clear"] + COLORS["light-magenta"],
     "line1": COLORS["clear"],
     "line2": COLORS["clear"],
     "line1start": COLORS["clear"] + COLORS["light-red"],
@@ -115,44 +114,6 @@ def recurse_file(opts, directory, action):
             if is_binary(f):
                 continue
             action(f)
-
-
-class Context:
-    """ regexp context """
-    def __init__(self, filename):
-        self.filename = filename
-
-    def search(self, line):
-        """ search for a context line """
-        pass
-
-    def display(self):
-        """ display a context if needed """
-        pass
-
-
-class PyContext(Context):
-    def __init__(self, filename):
-        Context.__init__(self, filename)
-        self.regexp = re.compile("[ \t]*def[ \t].*\(.*\)[ \t]*:")
-        self.match = None
-        self.displayed = False
-
-    def search(self, line):
-        """ search for a function or class name """
-        if self.regexp.search(line):
-            self.match = line
-            self.displayed = False
-
-    def display(self):
-        """ display the current function/class name """
-        if self.displayed:
-            return
-        if not self.match:
-            return
-        print("%sIn: %s%s" % (COLORS_REPLACE["pyctx"],
-              self.match.strip(), COLORS["clear"]))
-        self.displayed = True
 
 
 def replace_in_file(opts, in_file, regexp, repl):
@@ -277,8 +238,6 @@ def main(args=None):
                              help="Do not colorize output")
     option_parser.add_option("--quiet", "-q", action="store_true", dest="quiet",
                              help="Do not produce any output")
-    option_parser.add_option("--no-py-ctx", action="store_false", dest="pyctx",
-                             help="Do not use the python context")
 
     option_parser.set_defaults(
         no_hidden=True,
@@ -288,7 +247,7 @@ def main(args=None):
         color=True,
         debug=False,
         quiet=False,
-        pyctx=True)
+        )
 
     (opts_obj, args) = option_parser.parse_args(args=args)
 
