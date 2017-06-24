@@ -82,27 +82,27 @@ def is_binary(filename):
         return False
 
 
-def recurse_file(args, root, directory, action):
+def walk_files(args, root, directory, action):
     """
     Recusively go do the subdirectories of the directory,
     calling the action on each file
 
     """
-    for f in os.listdir(directory):
+    for entry in os.listdir(directory):
         skip_this_dir = False
-        if os.path.isdir(f):
+        if os.path.isdir(entry):
             for exclude in args.excludes:
                 if "/" in exclude:
                     root = exclude.split("/")[0]
-                    if f == root:
+                    if entry == root:
                         skip_this_dir = True
         if skip_this_dir:
             continue
-        if args.skip_hidden and f.startswith("."):
+        if args.skip_hidden and entry.startswith("."):
             continue
         filter_out = False
         for fo in FILTER_OUT:
-            if fnmatch.fnmatch(f, fo):
+            if fnmatch.fnmatch(entry, fo):
                 filter_out = True
                 break
         if filter_out:
@@ -110,25 +110,25 @@ def recurse_file(args, root, directory, action):
         if args.includes:
             filter_out = True
             for fo in args.includes:
-                if fnmatch.fnmatch(f, fo):
+                if fnmatch.fnmatch(entry, fo):
                     filter_out = False
                     break
-        full_path = os.path.join(directory, f)
+        full_path = os.path.join(directory, entry)
         relpath = os.path.relpath(full_path)
         if args.excludes:
             for fo in args.excludes:
                 if fnmatch.fnmatch(relpath, fo):
                     filter_out = True
                     break
-        f = os.path.join(directory, f)
-        if os.path.isdir(f):
-            recurse_file(args, root, f, action)
-        if os.path.isfile(f):
+        entry = os.path.join(directory, entry)
+        if os.path.isdir(entry):
+            walk_files(args, root, entry, action)
+        if os.path.isfile(entry):
             if filter_out:
                 continue
-            if is_binary(f):
+            if is_binary(entry):
                 continue
-            action(f)
+            action(entry)
 
 
 def replace_in_file(args, in_file, regexp, repl):
@@ -204,7 +204,7 @@ def repl_main(args):
             repl_action(f)
     else:
         root = os.getcwd()
-        recurse_file(args, root, root, repl_action)
+        walk_files(args, root, root, repl_action)
 
     if not args.go and not args.quiet:
         print()
