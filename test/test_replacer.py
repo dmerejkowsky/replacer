@@ -1,3 +1,5 @@
+import re
+
 import replacer
 
 import path
@@ -14,6 +16,12 @@ def test_path(tmpdir, monkeypatch):
 
     monkeypatch.chdir(dest)
     return dest
+
+
+@pytest.fixture
+def long_line():
+    garbage = "I repeat the same thing 100 times! " * 100
+    return garbage + " - I'm old - " + garbage
 
 
 def assert_replaced(filename):
@@ -107,3 +115,23 @@ def test_backup(test_path):
     replacer.main(["old", "new", "--go", "--backup"])
     top_backup = test_path.files("*.back")[0]
     assert "old" in top_backup.text()
+
+
+def test_shorten_line(long_line):
+    short_line = replacer.shorten_line(long_line, "old")
+    assert len(short_line) <= 100
+    assert "old" in short_line
+    print(short_line)
+
+
+def test_truncate_long_lines(test_path, long_line, capsys):
+    test_txt = test_path.joinpath("test.txt")
+    test_txt.write_text("This is an old short line\n")
+    test_txt.write_text(long_line, append=True)
+
+    replacer.main(["old", "new"])
+
+    stdout, _ = capsys.readouterr()
+    assert re.search("-- .* - I'm old - .*", stdout)
+    assert re.search(r"\+\+ .* - I'm new - .*", stdout)
+    print(stdout)

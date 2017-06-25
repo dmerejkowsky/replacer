@@ -161,7 +161,21 @@ def get_replacements(line, regexp, repl):
     return (in_replacements, out_replacements)
 
 
+def shorten_line(line, regexp):
+    if len(line) < 100:
+        return line
+    match = re.search(regexp, line)
+    if len(match.group()) >= 100:
+        return line[:100]
+    else:
+        padding = (100 - len(match.group())) // 2
+        padding -= 9  # (the two ellipsis plus the \n)
+        res = line[match.start() - padding: match.end() + padding]
+        return "... " + res + " ..." + "\n"
+
+
 def display_one_diff(line, regexp, repl):
+    line = shorten_line(line, regexp)
     in_replacements, out_replacements = get_replacements(line, regexp, repl)
     in_color = apply_replacements(line, in_replacements)
     out_color = apply_replacements(line, out_replacements)
