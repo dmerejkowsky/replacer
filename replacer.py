@@ -165,8 +165,8 @@ def display_one_diff(line, regexp, repl):
     in_replacements, out_replacements = get_replacements(line, regexp, repl)
     in_color = apply_replacements(line, in_replacements)
     out_color = apply_replacements(line, out_replacements)
-    print(COLORS["red"], "--", COLORS["clear"], in_color, end="", sep="")
-    print(COLORS["green"], "++", COLORS["clear"], out_color, end="", sep="")
+    print(COLORS["red"], "-- ", COLORS["clear"], in_color, end="", sep="")
+    print(COLORS["green"], "++ ", COLORS["clear"], out_color, end="", sep="")
     print()
 
 
