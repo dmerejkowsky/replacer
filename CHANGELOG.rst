@@ -1,3 +1,13 @@
+v1.1.1
+======
+
+* Fix regression: non UTF-8 files are now ignored insteod of
+  crashing the whole program.
+
+Properly handling non UTF-8 files is not done yet, see
+`issue #3 <https://github.com/dmerejkowsky/replacer/issues/3>`_
+
+
 v1.1.0
 =======
 
