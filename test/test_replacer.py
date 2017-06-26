@@ -135,3 +135,10 @@ def test_truncate_long_lines(test_path, long_line, capsys):
     assert re.search("-- .* - I'm old - .*", stdout)
     assert re.search(r"\+\+ .* - I'm new - .*", stdout)
     print(stdout)
+
+
+def test_non_utf_8(test_path, monkeypatch):
+    # Just check it does not crash
+    latin_1_encoded = "café".encode("latin-1")
+    test_path.joinpath("non-utf8.txt").write_bytes(latin_1_encoded)
+    replacer.main(["old", "new"])

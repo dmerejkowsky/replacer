@@ -209,7 +209,7 @@ def replace_in_file(args, in_file, regexp, repl):
     try:
         with open(in_file, "r") as in_fd:
             in_lines = in_fd.readlines()
-    except OSError as error:
+    except (OSError, UnicodeDecodeError) as error:
         print("Cant open file:", in_file, error)
         return
 
