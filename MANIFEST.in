@@ -1,2 +1,5 @@
 include README.rst
 include COPYING
+include CHANGELOG.rst
+
+graft test/test_path/
