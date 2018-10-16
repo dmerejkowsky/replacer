@@ -1,3 +1,8 @@
+**NOTICE**
+
+This project is no longer maintained. Users are encouraged to switch to `Ruplacer <https://github.com/supertanker/ruplacer/>`_, a rewrite in Rust by the same author. It is both faster and   more featureful, and I believe you'll like it :)
+
+
 replacer
 ========
 
@@ -10,7 +15,7 @@ Requirements
 -------------
 
 
-Python 2.7 or Python 3.
+Python 3.
 
 Install
 -------
